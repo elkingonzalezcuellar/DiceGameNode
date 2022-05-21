@@ -1,37 +1,57 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require('express');
+const path = require('path');
+const exphbs = require('express-handlebars');
+const methodOverride= require ('method-override');
+const logger = require('morgan');
+const  indexRouter = require('./routes/index.routes');
+const  gameRouter= require('./routes/game.routes')
 require('dotenv').config();
 
-var indexRouter = require('./routes/index');
+
+// Initilizations
+const  app = express();
+const createError = require('http-errors');
+const cookieParser = require('cookie-parser');
+
+//view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.engine(
+  ".hbs",
+  exphbs.engine({
+    defaultLayout: "main",
+    layoutsDir: path.join(app.get("views"), "layouts"),
+    partialsDir: path.join(app.get("views"), "partials"),
+    extname: ".hbs",
+  })
+);
+app.set("view engine", ".hbs");
 
 
-var app = express();
+//Middlewares
+app.use(logger('dev'));
+app.use(express.urlencoded({ extended: false }));
+app.use(methodOverride("_method"));
+
+
+
+//Global Variables
+
+//Routes
+app.use(indexRouter);
+app.use(gameRouter);
+//Static Files
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Database connection
 const mongoose = require('mongoose');
-const uri=`mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.a0pnb.mongodb.net/${process.env.DBNAME}?retryWrites=true&w=majorityretryWrites=true&w=majority`;
+const uri=`mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.a0pnb.mongodb.net/${process.env.DBNAME}?retryWrites=true&w=majority`
 
 mongoose.connect(uri)
-.then(()=>{console.log("Connected")})
+.then(()=>{console.log("DB Connected")})
 .catch(e=>{console.log(e)});
 
-
-
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
-
-app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/', indexRouter);
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

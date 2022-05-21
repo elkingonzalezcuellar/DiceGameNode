@@ -1,0 +1,32 @@
+
+<div class="col-md-4 mx-auto">
+  <div class="card text-center">
+    <div class="card-header">
+      <h3>Create Game</h3>
+    </div>
+    <div class="card-body">
+      <form action="/createGame" method="POST">
+        <div class="form-group">
+          <input type="text" name="playerone" class="form-control" placeholder="Name player one"  autofocus required/>
+          
+        </div>
+        <div class="form-group">
+          <input type="text" name="playertwo" class="form-control" placeholder="Name player two"  required/>
+        </div>
+        <div class="form-group">
+          <input type="text" name="playerthree" class="form-control" placeholder="Name player three" required/>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary btn-block" type="submit">
+            Create Game !
+          </button>
+              {{#if gameId}}
+              <h4>Game Created</h4>
+              <p>Game ID  : {{{gameId}}}</p>
+              {{/if}}    
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
