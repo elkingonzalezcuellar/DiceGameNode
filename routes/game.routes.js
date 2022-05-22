@@ -7,7 +7,7 @@ const gameController = require('../controllers/game.controller');
 router.get("/createGame", gameController.renderCreateGameForm);
 router.post('/createGame' , gameController.createGame);
 router.get("/startGame",gameController.renderStartGameForm);
-router.post("/startGame", gameController.startGame1);
+router.post("/startGame", gameController.startGame);
 router.get('/game/:id',gameController.renderGameId);
 router.get('/game/:id/winner',gameController.renderGameWinner);
 

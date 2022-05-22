@@ -59,83 +59,65 @@ exports.createGame= async (req, res) => {
   }
 };
 exports.startGame = async (req, res) => {
- const gameId = req.body.gameId;
- Game.findById(gameId,function (err,game) {
 
-  const bets = SetNumber(game);
-  const winner = setWinner(bets)
-  game.inProgress = false;
-  game.winner = winner;
-  console.log(game)
-  res.send(game)
- })
- 
-  //const bets = SetNumber(game);
-  //const winner = setWinner(bets)
-  //res.render('game/createGame');
-  //res.render("notes/edit-note", { note });
+const gameId = req.body.gameId;
+const gamefind = await  Game.findById(gameId);
+const bets = setBet(gamefind);
+console.log(bets)
+const winner = setWinner(bets)
+gamefind.inProgress = false;
+gamefind.winner = winner;
+
+await Game.findByIdAndUpdate(gameId,gamefind);
+  
+res.render('startGame', { 
+  title: 'Start Game', 
+  game: gamefind, 
+  gamersBet: bets, 
+  winner:winner
+});
 };
-
-exports.startGame1= async(req,res,next)=>{
-     const gameId = req.body.gameId;
-
-   Game.findById(gameId, function (err, game){
-      
-        if (err) { 
-            const err = new Error('Invalid data. Please try again');
-            return next(err);
-        }
-        if(game == null){
-            const err = new Error('ID not found');
-            err.status = 404;
-            return next(err);
-        }
-        if(!game.inProgress){
-            const err = new Error('The game has already been played.');
-            err.status = 400;
-            return next(err);
-        }
-
-      const bets = SetNumber(game);
-      const winner = setWinner(bets)
-
-        game.inProgress = false;
-        game.winner = winner;
-        
-        Game.findByIdAndUpdate(gameId, game, {}, function (err) {
-            if (err) { 
-                const err = new Error('Update failed.');
-                return next(err);
-            }
-        });
-        console.log(game)
-
-        // Successful, so render.
-        res.render('game/createGame', { 
-            title: 'Start Game', 
-            game: game, 
-            gamersBet: bets, 
-            winner:winner
-        });
-    });
-}
 
 // fuctions bets
 
 function randomNumber(){
-  return Math.random() * (6- 1) + 1;
+  const numbers = []
+  let n = 0;
+  let number;
+  let one = 0;
+  let two = 0;
+  let three = 0;
+    do {
+        number = Math.floor((Math.random() * 6) + 1);
+        if ((number != one) && (number!= two) && (three != 3)) {
+           numbers.push(number)
+            n++;
+            if (n == 1) {
+                one = number;
+            }
+            if (n == 2) {
+                two = number;
+            }
+            if (n == 3) {
+                three = number;
+            }
+        }
+    } 
+while (n < 3);
+  
+  return numbers;
 }
 
 // fuction setnumber
 
-function SetNumber(game){
-  const gamersBet =[]
- 
-  for (let i = 0; i < 2; i++) {
+function setBet(game){
+  const gamersBet =[];
+  bets = randomNumber();
+  for (let i = 0; i < 3; i++) {
       gamersBet.push({
         id: game.gamers[i]._id,
         name: game.gamers[i].name,
-        bet: randomNumber()
+        bet: bets[i]
   })
     
   }
@@ -144,19 +126,8 @@ function SetNumber(game){
 
 
 // fuction  set Winner
-
-function setWinner(gamersBet) {
+function setWinner(bets){
+    const orderBets = bets.sort(function(a, b){return a.bet - b.bet})
+    return orderBets[2].name
   
-  const temporary = 0;
-          for (let i = 0; i < gamersBet.length - 1; i++) {
-            for (let j = 0; j < gamersBet.length - 1; j++) {
-                if (gamersBet.bet[j] > [j + 1]) {
-                    temporary = gamersBet.bet[j];
-                    gamersBet.bet[j] = gamersBet.bet[j + 1];
-                    gamersBet.bet[j + 1] = temporary;
-                }
-            }
-        }
-  const winner = gamersBet[gamersBet.length].name;
-  return winner
 }
